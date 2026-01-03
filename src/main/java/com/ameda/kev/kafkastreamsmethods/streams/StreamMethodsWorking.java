@@ -74,20 +74,47 @@ public class StreamMethodsWorking {
 //                .peek((key,item)-> log.info(" flatMapValues -- Item purchased value only: {}", item));
 
 
-        // branch(). Splits a single stream into multiple sub-stream based on a condition. i.e from the transactions.json provided in
+        // branch(). Splits a single stream into multiple sub-stream based on a condition. i.e. from the transactions.json provided in
         //classpath, we have a field as 'type', we could split the records based on that.
 
+//        stream
+//                .split(Named.as("txn-"))
+//                .branch((key, txn) -> txn.type().equalsIgnoreCase("debit"),
+//                        Branched.withConsumer(debitKs ->
+//                                debitKs.peek((k,t) -> log.info(" Debit transaction key :{} and transactions : {}",k,t.amount()))
+//                                        .to("debit-topic")))
+//                .branch((key, txn)-> txn.type().equalsIgnoreCase("credit"),
+//                        Branched.withConsumer( creditKs ->
+//                                creditKs.peek((k,t)-> log.info("Credit transaction key: {} and transaction : {}",k,t.amount())).
+//                                        to("credit-topic")));
 
+
+        //groupBy when it comes to groupBy or even aggregate() they work with a stateful nature of our streams and the state is stored in some
+        //in-memory db known as RocksDB. So tied to the state storing I have used a property called the state-dir which maintains that.
+
+//        stream
+//                .groupBy((key, txn)-> txn.location())
+//                .count()
+//                .peek((loc, count)-> log.info(" Location {} has {} transactions",loc,count));
+
+
+        // count() is a stateful operation
+//        stream
+//                .groupBy((key,txn) -> txn.userId())
+//                .count(Materialized.as("user-txn-count-store"))
+//                .toStream()
+//                .peek((key,val)-> log.info(" User {} made {} transactions", key,val));
+
+        //aggregate()
         stream
-                .split(Named.as("txn-"))
-                .branch((key, txn) -> txn.type().equalsIgnoreCase("debit"),
-                        Branched.withConsumer(debitKs ->
-                                debitKs.peek((k,t) -> log.info(" Debit transaction key :{} and transactions : {}",k,t.amount()))
-                                        .to("debit-topic")))
-                .branch((key, txn)-> txn.type().equalsIgnoreCase("credit"),
-                        Branched.withConsumer( creditKs ->
-                                creditKs.peek((k,t)-> log.info("Credit transaction key: {} and transaction : {}",k,t.amount())).
-                                        to("credit-topic")));
+                .groupBy((key, txn)-> txn.type())
+                .aggregate(
+                        () -> 0.0,
+                        (type, tx, currentSum) -> currentSum + tx.amount(),
+                        Materialized.with(Serdes.String(),Serdes.Double())
+                ).toStream()
+                .peek((k,v)-> log.info(" Card Type {} running total amount {}", k,v));
+
         return stream;
 
     }

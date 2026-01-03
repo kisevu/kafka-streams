@@ -11,3 +11,7 @@ spring:
       properties:
         default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
         default.value.serde: com.ameda.kev.kafkastreamsmethods.serdes.TransactionSerde
+
+# groupBy. Working with stateful functions when it comes to kafka streams
+        state.dir: /home/ameda/Downloads/kafka-streams-logs
+
