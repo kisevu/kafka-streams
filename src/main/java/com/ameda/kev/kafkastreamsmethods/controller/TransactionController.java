@@ -37,7 +37,7 @@ public class TransactionController {
     }
 
     private List<Transaction> readTransactionResource(){
-        try(InputStream is = getClass().getResourceAsStream("transactions.json")){
+        try(InputStream is = getClass().getResourceAsStream("/transactions.json")){
             return mapper.readValue(is, new TypeReference<List<Transaction>>(){});
         }catch (IOException ex){
             log.error(" Error occurred : {} with cause : {}",ex.getMessage(), ex.getCause());

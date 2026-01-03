@@ -19,6 +19,23 @@ public class KafkaConfig {
                 3, (short) 1);
     }
 
+    @Bean
+    public NewTopic createFilterNotTopic() {
+        return new NewTopic("filter-not-topic",
+                3 , (short)  1);
+    }
+
+    @Bean
+    public NewTopic createDebitTopic() {
+        return new NewTopic("debit-topic",
+                3 , (short)  1);
+    }
+
+    @Bean
+    public NewTopic createCreditTopic() {
+        return new NewTopic("credit-topic",
+                3 , (short)  1);
+    }
 
 
 }
