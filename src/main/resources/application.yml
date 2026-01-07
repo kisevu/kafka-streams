@@ -15,3 +15,11 @@ spring:
 # groupBy. Working with stateful functions when it comes to kafka streams
         state.dir: /home/ameda/Downloads/kafka-streams-logs
 
+rapidapi:
+  key: ${rapidapi.key}
+  host: ${rapidapi.host}
+  jobs:
+    key: ${rapidapi.jobs.key}
+    host: ${rapidapi.jobs.host}
+
+
