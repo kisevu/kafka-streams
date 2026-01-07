@@ -1,8 +1,7 @@
 package com.ameda.kev.kafkastreamsmethods.client;
 
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.service.registry.ImportHttpServices;
 
 /**
@@ -11,14 +10,14 @@ import org.springframework.web.service.registry.ImportHttpServices;
 @Configuration
 @ImportHttpServices(types = {RapidClient.class,IndeedClient.class})
 //@ImportHttpServices(basePackages = "com.ameda.kev.kafkastreamsmethods.client",
-//        types = {RapidClient.class}, group = "rapid-clientt")
-
+//        types = {RapidClient.class}, group = "rapid-client")
 public class HttpClientConfig {
 
+    @Value("${rapidapi.jobs.key}")
+    private String rapidApiKey;
 
-    @Bean
-    public RestTemplate restTemplate(){
-        return new RestTemplate();
-    }
+    @Value("${rapidapi.jobs.host}")
+    private String rapidApiHost;
+
 }
 

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -44,18 +45,15 @@ public class TransactionController {
     @Value("${rapidapi.jobs.host}")
     private String indeedHost;
 
+    private RestClient restClient;
+
     private final IndeedClient indeedClient;
 
-
-    private final RestTemplate restTemplate;
-
-
     public TransactionController(KafkaTemplate<String, Transaction> kafkaTemplate,
-                                 RapidClient rapidClient, IndeedClient indeedClient, RestTemplate restTemplate) {
+                                 RapidClient rapidClient, IndeedClient indeedClient) {
         this.kafkaTemplate = kafkaTemplate;
         this.rapidClient = rapidClient;
         this.indeedClient = indeedClient;
-        this.restTemplate = restTemplate;
     }
 
     @PostMapping("/publish")
@@ -83,11 +81,6 @@ public class TransactionController {
         return ResponseEntity.ok(tmdbTrendingResponse);
     }
 
-    @GetMapping("/callback")
-    public void callback(String result){
-        log.info("Callback called and executed successfully at {}", Instant.now());
-        return;
-    }
 
     @GetMapping("/indeed/{jobId}")
     public ResponseEntity<?> getIndeedJobDetail(@PathVariable("jobId") String jobId,
@@ -96,16 +89,27 @@ public class TransactionController {
         return ResponseEntity.ok(jobDetails);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestBody RestReq restReq){
-        String baseUrl = "http://localhost:8080/api/transactions";
-        try{
-            restTemplate.getForObject(new URI(baseUrl+restReq.url()),String.class);
-        }catch (URISyntaxException ex){
-            log.error(" An occurred : {}", ex.getMessage());
-        }
 
-        return ResponseEntity.ok("created a request");
+    @GetMapping
+    public void result(){
+        this.restClient = RestClient.builder()
+                .baseUrl("http://")
+                .defaultHeader("X-Rapidapi-key",rapidApiKey)
+                .defaultHeader("X-Rapidapi-host",rapidApiHost)
+                .build();
     }
+
+    public IndeedJobDetails getJobDetails(String jobId, String locality,RestClient restClient){
+        //the passed in restClient is the similar one used
+        return restClient.get()
+                .uri( uriBuilder -> uriBuilder
+                        .path("/job/{jobId}")
+                        .queryParam("locality",locality)
+                        .build(jobId))
+                .retrieve()
+                .body(IndeedJobDetails.class);
+    }
+
+
 
 }
